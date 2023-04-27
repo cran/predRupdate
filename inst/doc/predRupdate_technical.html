@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Glen P. Martin, PhD; David Jenkins, PhD; Matthew Sperrin, PhD" />
+
+
+<title>Technical Background to predRupdate</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Technical Background to predRupdate</h1>
+<h4 class="author">Glen P. Martin, PhD; David Jenkins, PhD; Matthew
+Sperrin, PhD</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#preamble" id="toc-preamble">Preamble</a></li>
+<li><a href="#clinical-prediction-models" id="toc-clinical-prediction-models">Clinical Prediction Models</a></li>
+<li><a href="#predictive-performance-metrics" id="toc-predictive-performance-metrics">Predictive Performance
+Metrics</a>
+<ul>
+<li><a href="#calibration" id="toc-calibration">Calibration</a></li>
+<li><a href="#discrimination" id="toc-discrimination">Discrimination</a></li>
+<li><a href="#overall-accuracy" id="toc-overall-accuracy">Overall
+Accuracy</a></li>
+</ul></li>
+<li><a href="#model-updating-methods" id="toc-model-updating-methods">Model Updating Methods</a></li>
+<li><a href="#model-aggregation-methods" id="toc-model-aggregation-methods">Model Aggregation Methods</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<div id="preamble" class="section level1">
+<h1>Preamble</h1>
+<p>The <strong>predRupdate</strong> package includes a set of functions
+to aid in the validation of a clinical prediction model (CPM) on a given
+dataset, and to apply various model updating and aggregation methods.
+This vignette aims to overview the technical details of the methods that
+are implemented within the <strong>predRupdate</strong> package. For an
+introduction to using the package, please see
+<code>vignette(&quot;predRupdate&quot;)</code>.</p>
+</div>
+<div id="clinical-prediction-models" class="section level1">
+<h1>Clinical Prediction Models</h1>
+<p>Clinical prediction models (CPMs) are statistical models that aim to
+predict the presence (diagnostic models) or future occurrence
+(prognostic models) of an outcome of interest for an individual, using
+information (predictor variables) that are available about that
+individual at the time the prediction is made. For example, we might use
+someone’s age, sex, smoking status and family medical history to predict
+their risk of developing cardiovascular disease in the next ten years.
+These models can be used to aid clinical decision-making, form the
+cornerstone of decision support systems, and underpin clinical audit and
+feedback tasks.</p>
+<p>The usual stages for the production of CPMs are: (i) model
+development and internal validation, (ii) external validation in new
+data, potentially with updating as needed, and (iii) impact assessment.
+These are summarised in the table below:</p>
+<table>
+<caption>Phases of clinical prediction model production</caption>
+<colgroup>
+<col width="11%" />
+<col width="88%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Phase</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(i) Model Development and internal validation</td>
+<td align="left">The development of the model uses a cohort of patients,
+where the predictor variables and outcomes are known, to perform
+variable selection and estimate the prognostic effect (coefficient) of
+each predictor on the outcome of interest. This is followed by
+assessment of predictive performance within that data, adjusting for
+in-sample optimism</td>
+</tr>
+<tr class="even">
+<td align="left">(ii) External validation</td>
+<td align="left">Aims to assess the predictive performance of the
+developed model in data that are different to those used to develop the
+model (e.g., temporally or geographically different). If performance is
+deemed unsuitable, the model may undergo updating to tailor it more
+closely to the new data</td>
+</tr>
+<tr class="odd">
+<td align="left">(iii) Impact Assessment</td>
+<td align="left">Impact assessment investigates the extent to which the
+model changes clinical practice and improves patient outcomes</td>
+</tr>
+</tbody>
+</table>
+<p>The aim of <strong>predRupdate</strong> is to provide tools for stage
+(ii). Specifically, the package is intended for the situation where a
+CPM has already been developed (e.g., a model available in the
+literature), and one wishes to apply the model to a new dataset for
+validation, updating, or both. The package assumes that one has access
+to the reported model parameters (all those that are required to make a
+prediction of risk for a new observation) and an individual participant
+dataset in which one wishes to apply the model.</p>
+<p>This vignette is not intended to be a detailed tutorial of prediction
+modelling. For that, we refer readers to Riley et al. 2019 and
+Steyerberg 2009. Instead, this vignette is intended to describe the
+technical details of how certain methodologies have been implemented in
+<strong>predRupdate</strong>.</p>
+</div>
+<div id="predictive-performance-metrics" class="section level1">
+<h1>Predictive Performance Metrics</h1>
+<p>The predictive performance of a CPM is summarised by its calibration,
+discrimination and overall accuracy. We provide a brief overview of the
+technical details that are implemented in <strong>predRupdate</strong>
+in the <code>pred_validate()</code> function, but refer readers to the
+literature for a detailed overview (Riley et al. 2019; Steyerberg et
+al. 2013; Moons et al. 2012; Altman and Royston 2000; Van Calster et
+al. 2016; McLernon et al. 2023).</p>
+<div id="calibration" class="section level2">
+<h2>Calibration</h2>
+<p>Calibration is the agreement of the predicted risks from the CPM with
+the observed risks in the validation dataset, across the full risk
+range. A primary method of assessing calibration is to produce a
+flexible calibration plot, which graphically depicts the estimated risk
+(x-axis) and the observed probabilities (y-axis). The observed
+probabilities are obtained by regressing the observed outcomes in the
+validation dataset against the linear predictor (calculated for each
+individual in the validation dataset), using loess or splines.</p>
+<p>Specifically, suppose an existing (logistic regression) CPM has been
+developed (in another dataset) to predict the probability of a binary
+outcome, <span class="math inline">\(Y\)</span>. This CPM is given
+by</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right) = \hat{\beta}_0 +
+\hat{\beta}_1X_{i,1} + \hat{\beta}_2X_{i,2} + ... + \hat{\beta}_PX_{i,P}
+\]</span></p>
+<p>where <span class="math inline">\(\pi_{i} = P(Y_i = 1)\)</span>, with
+<span class="math inline">\(\hat{\beta}_{0},...\hat{\beta}_{P}\)</span>
+being the estimated set of regression coefficients (log odds ratios;
+taken from the original development of the model) and <span class="math inline">\(X_{i,p}\)</span> the value of predictor variable
+<span class="math inline">\(p\)</span> for individual <span class="math inline">\(i\)</span>. This linear combination of the
+regression coefficients and predictor variables is the linear predictor
+of the model.</p>
+<p>To obtain a flexible calibration plot of this model within the
+validation data, <code>pred_validate()</code> fits the following model
+to the validation data:</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right) = \alpha_0 + s(LP_i)
+\]</span></p>
+<p>where <span class="math inline">\(s(.)\)</span> is some smooth
+function; in <code>pred_validate()</code> this is a natural cubic
+spline. This model is then used to obtain observed probabilities for
+each individual in the validation dataset, which are plotted against the
+corresponding predicted risks obtained from the CPM. A resulting curve
+close to the diagonal (y=x line) indicates that predicted risks
+correspond well to observed proportions. In
+<code>pred_validate()</code>, a histogram of the predicted risk
+distribution is overlaid with the calibration plot, to visually
+summarise the probability distribution.</p>
+<p>If validating an existing time-to-event CPM,
+<code>pred_validate()</code> produces the flexible calibration plot
+using methods similar to those described above for logistic regression
+models. Here, the observed probabilities are obtained by fitting a Cox
+proportional hazards model to regress the linear predictor of the model
+(under natural cubic spline) against the time-to-event outcome in the
+validation dataset. A time horizon must also be specified (i.e., the
+time during follow-up in which to assess calibration). Such a plot can
+only be produced for an existing time-to-event CPM if the cumulative
+baseline hazard of the model is supplied.</p>
+<p>Alongside flexible calibration plots, <code>pred_validate()</code>
+also calculates the calibration slope. The calibration slope (ideal
+value 1) indicates the level of over-fitting of the model, with values
+less than 1 indicating more over-fitting. In
+<code>pred_validate()</code> this is estimated by fitting a logistic
+regression model (if the existing CPM is a logistic model) or Cox
+proportion hazards model (if the existing CPM is a survival model) to
+the observed outcomes in the validation dataset with the linear
+predictor from the CPM as the only covariate.</p>
+<p>Finally, calibration-in-the-large summarises how close the mean
+predicted risk is to the mean outcome proportion in the validation
+dataset. If validating a logistic regression CPM, this is quantified
+using the calibration intercept, estimated using the same model as
+estimating the calibration slope, with the slope fixed at unity. Here, a
+calibration intercept less than 0 would indicate that the mean predicted
+risk is higher than the observed outcome proportion. If validating a
+time-to-event (survival) CPM, then calibration-in-the-large is
+quantified with the observed:expected ratio (ideal value 1) at a fixed
+time horizon. Here, the observed proportion is obtained using
+Kaplan-Meier estimate. Such a metric can only be produced for an
+existing time-to-event CPM if the cumulative baseline hazard of the
+model is supplied such that the predicted risks at the time horizon can
+be calculated.</p>
+</div>
+<div id="discrimination" class="section level2">
+<h2>Discrimination</h2>
+<p>Discrimination of a CPM is the ability of the model to differentiate
+those who experience the outcome from those who do not; i.e., does the
+model estimate a higher predicted risk, on average, for those who
+experience the outcome, compared to those who do not experience the
+outcome. For validating logistic regression CPMs,
+<code>pred_validate()</code> calculates the area under the receiver
+operating characteristic curve (AUC) of the CPM. For validating
+time-to-event (survival) CPMs, <code>pred_validate()</code> calculates
+Harrell’s C-statistic. An AUC/ C-statistic of 0.5 would indicate
+discrimination no better than chance, whereas a value of 1 indicates
+perfect calibration.</p>
+</div>
+<div id="overall-accuracy" class="section level2">
+<h2>Overall Accuracy</h2>
+<p>For validating a logistic regression model,
+<code>pred_validate()</code> also produces two additional metrics of
+overall accuracy of the model. The first is the Cox-Snell and Nagelkerke
+R-squared values. Here, higher R-squared values indicate better overall
+performance of the model.</p>
+<p>The Cox-Snell R-squared is estimated by</p>
+<p><span class="math display">\[
+R^{2}_{CS} = 1 - \exp\left(\frac{-LR}{n}\right)
+\]</span></p>
+<p>where <span class="math inline">\(LR\)</span> is the likelihood ratio
+statistic, and <span class="math inline">\(n\)</span> is the size of the
+validation dataset. Specifically,</p>
+<p><span class="math display">\[
+LR = -2(L_{null} - L_{model})
+\]</span></p>
+<p>with <span class="math inline">\(L_{model}\)</span> being the
+log-likelihood of the CPM on the validation dataset, and <span class="math inline">\(L_{null}\)</span> is the log-likelihood of an
+intercept-only model in the validation dataset. Nagelkerke R-squared is
+then a scaled version of Cox-Snell R-squared, such that 1 is the ‘best’
+value (unlike Cox-Snell R-squared).</p>
+<p>Finally, the Brier score of the logistic regression CPM is also
+calculated, as the average squared difference between the observed
+outcome and the predicted risks from the model.</p>
+</div>
+</div>
+<div id="model-updating-methods" class="section level1">
+<h1>Model Updating Methods</h1>
+<p>Upon validating an existing CPM in new data (external validation) it
+is not uncommon to find that the models predictive performance
+deteriorates. Rather than developing a new model, an alternative
+strategy is to apply model updating methods. See Moons et al. 2012 and
+Su et al. 2018 for a detailed overview of these methods. The extent of
+model updating depends on the issues identified during model
+validation.</p>
+<p>If the model validation identifies that the CPM has poor
+calibration-in-the-large, then a simple updating strategy is “intercept
+update”. For a logistic regression CPM, <code>pred_update()</code> fits
+the following model in the new dataset using maximum likelihood
+estimation:</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right) = \alpha_0 + LP_i = \alpha_0 +
+(\hat{\beta}_0 + \hat{\beta}_1X_{i,1} + ... + \hat{\beta}_PX_{i,P})
+\]</span></p>
+<p>Here, <span class="math inline">\(\alpha_0\)</span> serves to update
+the intercept of the original model such that the mean predicted risk
+from the (updated) CPM matches the observed event proportion in the new
+dataset. Specifically, the new intercept will be <span class="math inline">\(\alpha_0 + \hat{\beta}_0\)</span>. All other terms
+(<span class="math inline">\(\beta_{1},...,\beta_{P}\)</span>) remain
+the same as originally published.</p>
+<p>Often, the original model will also demonstrate elements of
+over-fitting (i.e., the calibration slope of the model is &lt;1 in the
+validation data). In such a case, the model can be re-calibrated in the
+new dataset. For a logistic regression CPM, <code>pred_update()</code>
+fits the following model in the new dataset using maximum likelihood
+estimation:</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right) = \alpha_0 + \alpha_1LP_i =
+\alpha_0 + \alpha_1(\hat{\beta}_0 + \hat{\beta}_1X_{i,1} + ... +
+\hat{\beta}_PX_{i,P})
+\]</span></p>
+<p>This has the effect of multiplying each original model coefficient by
+<span class="math inline">\(\alpha_1\)</span>. Specifically, the new
+(updated) regression coefficients will be <span class="math inline">\(\alpha_1 \times \beta{p}\)</span>, and the new
+model intercept is <span class="math inline">\(\alpha_0 + (\alpha_1
+\times \hat{\beta}_0)\)</span>.</p>
+<p>Neither of the above methods alter the discrimination of the model
+within the new dataset. For this, one option is to refit the model to
+the new dataset. Here, one would fit the following model in the new
+dataset using maximum likelihood estimation:</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right) = \hat{\alpha}_0 +
+\hat{\alpha}_1X_{i,1} + \hat{\alpha}_2X_{i,2} + ... +
+\hat{\alpha}_PX_{i,P}
+\]</span></p>
+<p>Here, <span class="math inline">\(\alpha_{0},...,\alpha_{P}\)</span>
+become the new regression coefficients of the updated model. There is
+also a less extreme version of model refitting, where one only
+re-estimates certain parameters. This will be implemented into the
+package in the near future.</p>
+<p>While we describe the updating methods above for logistic regression
+models, <strong>predRupdate</strong> also implements these approaches
+for time-to-event (survival) CPMs. The principles above are similar,
+expect the underlying model is changed to a Cox proportional hazards
+model (further parametric/ flexible parametric methods to be added in
+the future). Specifically, “intercept update” for a survival
+(time-to-event) CPM, has the following form: <span class="math display">\[
+h(t|X) = h_0(t)\exp(LP_i) = h_0(t)\exp(\hat{\beta}_1X_{i,1} + ... +
+\hat{\beta}_PX_{i,P})
+\]</span></p>
+<p>which has the effect of only re-estimating the baseline hazard in the
+new data. For re-calibration, the updated survival (time-to-event) CPM
+would be: <span class="math display">\[
+h(t|X) = h_0(t)\exp(\alpha_1LP_i) =
+h_0(t)\exp(\alpha_1(\hat{\beta}_1X_{i,1} + ... + \hat{\beta}_PX_{i,P}))
+\]</span> This has the effect of multiplying each original model
+coefficient (log-hazard ratios) by <span class="math inline">\(\alpha_1\)</span>, and estimating a new baseline
+hazard in the new data.</p>
+</div>
+<div id="model-aggregation-methods" class="section level1">
+<h1>Model Aggregation Methods</h1>
+<p>In some situations, there are instances where multiple existing CPMs
+are available for the same prediction task (e.g., existing models
+developed across different countries). Here, model aggregation methods
+can be used to pool these existing CPMs into a single model in the new
+data. Various methods exist for this (Martin et al. 2017), with
+<strong>predRupdate</strong> currently implementing stacked regression
+(Debray et al. 2014) through <code>pred_stacked_regression()</code>.
+More methods will be added in the future.</p>
+<p>Specifically, suppose there are a collection of <span class="math inline">\(M\)</span> existing logistic regression CPMs,
+which all aim to predict the same binary outcome, <span class="math inline">\(Y\)</span>, but where developed in different
+populations <span class="math inline">\(j=1,...,M\)</span>. The models
+may contain different predictor variables. Each model has a linear
+predictor (LP) given by</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right) = \hat{\beta}_{0,j} +
+\hat{\beta}_{1,j}X_{i,1} + \hat{\beta}_{2,j}X_{i,2} + ... +
+\hat{\beta}_{P,j}X_{i,P} = LP_{i,j}
+\]</span></p>
+<p>In this notation, if a given variable is not included in a given CPM,
+then the corresponding <span class="math inline">\(\beta\)</span> is
+equal to zero. One can then apply these models to each observation <span class="math inline">\(i\)</span> in the validation set to calculate the
+set of <span class="math inline">\(M\)</span> linear predictors.
+<code>pred_stacked_regression()</code> then applies stacked regression
+by regressing these set of linear predictors against the observed
+outcome in the validation dataset as</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right) = \gamma_0 + \gamma_1LP_{i,1} +
+... + \gamma_MLP_{i,M}
+\]</span></p>
+<p>This equation can be re-arranged to express in terms of the set of
+new (aggregated) predictor coefficients for each of the <span class="math inline">\(P\)</span> predictor variables. Given that the
+<span class="math inline">\(M\)</span> existing models all aim to
+predict the same outcome, there could be a high level of co-linearity in
+the set of <span class="math inline">\(M\)</span> linear predictors.
+Therefore, there have been suggestions to fit the above stacked
+regression model under the constraint that all of <span class="math inline">\(\gamma_1,...\gamma_M\)</span> should be
+non-negative. <code>pred_stacked_regression()</code> implements stacked
+regression with and without this constraint.</p>
+<p><code>pred_stacked_regression()</code> can also implement stacked
+regression for <span class="math inline">\(M\)</span> existing
+time-to-event (survival) CPMs. The technical details are similar to
+those described above for logistic models, with the exception that the
+underlying model is changed to a Cox proportional hazards model.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ol style="list-style-type: decimal">
+<li>Riley RD, et al. Prognosis Research in Healthcare: Oxford University
+Press; 2019</li>
+<li>Steyerberg EW. Clinical Prediction Models: Springer New York;
+2009</li>
+<li>Riley RD, Hayden JA, Steyerberg EW, et al. Prognosis research
+strategy (PROGRESS) 2: Prognostic factor research. PLoS Med
+2013;10:e1001380–e1001380</li>
+<li>Steyerberg EW, Moons KG, van der Windt DA, et al. Prognosis research
+strategy (PROGRESS) 3: prognostic model research. PLoS Med
+2013;10:e1001381–e1001381</li>
+<li>Moons KGM, Kengne AP, Grobbee DE, et al Risk prediction models: II.
+External validation, model updating, and impact assessment Heart
+2012;98:691-698.</li>
+<li>Altman, D.G. and Royston, P. What do we mean by validating a
+prognostic model?. Statist. Med., 2000;19:453-473.</li>
+<li>Van Calster, B., Nieboer, D., Vergouwe, Y., et al. A calibration
+hierarchy for risk models was defined: from utopia to empirical data. J.
+Clin. Epidemiol. 2016;74:167-176</li>
+<li>McLernon, D.J., Giardiello, D., Van Calster, B. et al. Assessing
+Performance and Clinical Usefulness in Prediction Models With Survival
+Outcomes: Practical Guidance for Cox Proportional Hazards Models. Ann
+Intern Med. 2023;176:105-114</li>
+<li>Su T-L, Jaki T, Hickey GL, Buchan I, Sperrin M. A review of
+statistical updating methods for clinical prediction models. Statistical
+Methods in Medical Research. 2018;27(1):185-197</li>
+<li>Martin, G.P., Mamas, M.A., Peek, N. et al. Clinical prediction in
+defined populations: a simulation study investigating when and how to
+aggregate existing models. BMC Med Res Methodol. 2017;17(1)</li>
+<li>Debray TP, Koffijberg H, Nieboer D, Vergouwe Y, Steyerberg EW, Moons
+KG. Meta-analysis and aggregation of multiple published prediction
+models. Stat Med. 2014;33(14):2341-62</li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
