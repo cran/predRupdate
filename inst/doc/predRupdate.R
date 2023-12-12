@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -7,7 +7,7 @@ knitr::opts_chunk$set(
 ## ----setup, echo = FALSE------------------------------------------------------
 library(predRupdate)
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 coefs_table <- as.data.frame(round(t(SYNPM$Existing_logistic_models[1,which(!is.na(SYNPM$Existing_logistic_models[1,]))]), 3))
 names(coefs_table) <- c("Coefficient")
 knitr::kable(coefs_table, caption = "Table of coefficients for the existing logistic regression prediction model")
@@ -19,7 +19,7 @@ coefs_table <- data.frame("Intercept" = -3.995, #the intercept needs to be named
                           "SexM" = 0.267, 
                           "Smoking_Status" = 0.751,
                           "Diabetes" = 0.523,
-                          "Creatine" = 0.578)
+                          "Creatinine" = 0.578)
 
 #pass this into pred_input_info()
 Existing_Logistic_Model <- pred_input_info(model_type = "logistic",
@@ -32,12 +32,18 @@ validation_results <- pred_validate(x = Existing_Logistic_Model,
                                     binary_outcome = "Y")
 summary(validation_results) #use summary() to obtain a tidy output summary of the model performance
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----fig.height=6, fig.width=6------------------------------------------------
+validation_results$flex_calibrationplot
+
+## ----fig.height=6, fig.width=6------------------------------------------------
+validation_results$flex_calibrationplot + ggplot2::theme_classic()
+
+## ----echo = FALSE-------------------------------------------------------------
 coefs_table <- as.data.frame(round(t(SYNPM$Existing_TTE_models[1,which(!is.na(SYNPM$Existing_TTE_models[1,]))]), 3))
 names(coefs_table) <- c("Coefficient")
 knitr::kable(coefs_table, caption = "Table of coefficients for the existing time-to-event regression prediction model")
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 BH_table <- SYNPM$TTE_mod1_baseline
 knitr::kable(BH_table, caption = "Table of baseline cumulative hazard")
 
@@ -47,7 +53,7 @@ coefs_table <- data.frame("Age" = 0.007,
                           "SexM" = 0.225,
                           "Smoking_Status" = 0.685,
                           "Diabetes" = 0.425,
-                          "Creatine" = 0.587)
+                          "Creatinine" = 0.587)
 
 #pass this into pred_input_info()
 Existing_TTE_Model <- pred_input_info(model_type = "survival",
@@ -62,26 +68,8 @@ validation_results <- pred_validate(x = Existing_TTE_Model,
                                     time_horizon = 5)
 summary(validation_results)
 
-## -----------------------------------------------------------------------------
-# create a data.frame of the model coefficients, with columns being variables
-coefs_table <- data.frame("Age" = 0.007,
-                          "SexM" = 0.225,
-                          "Smoking_Status" = 0.685,
-                          "Diabetes" = 0.425,
-                          "Creatine" = 0.587)
-
-#pass this into pred_input_info()
-Existing_TTE_Model <- pred_input_info(model_type = "survival",
-                                      model_info = coefs_table,
-                                      cum_hazard = NULL) #leave as NULL if the baseline not available
-
-#now validate against the time-to-event outcomes in the new dataset:
-validation_results <- pred_validate(x = Existing_TTE_Model,
-                                    new_data = SYNPM$ValidationData,
-                                    survival_time = "ETime",
-                                    event_indicator = "Status",
-                                    time_horizon = 5)
-summary(validation_results)
+## ----fig.height=6, fig.width=10-----------------------------------------------
+plot(validation_results)
 
 ## -----------------------------------------------------------------------------
 # create a data.frame of the model coefficients, with columns being variables
@@ -90,7 +78,7 @@ coefs_table <- data.frame("Intercept" = -3.995,
                           "SexM" = 0.267, 
                           "Smoking_Status" = 0.751,
                           "Diabetes" = 0.523,
-                          "Creatine" = 0.578)
+                          "Creatinine" = 0.578)
 
 #pass this into pred_input_info()
 Existing_Logistic_Model <- pred_input_info(model_type = "logistic",
@@ -115,19 +103,19 @@ coefs_table <- data.frame(rbind(c("Intercept" = -3.995,
                                   "SexM" = 0.267,
                                   "Smoking_Status" = 0.751,
                                   "Diabetes" = 0.523,
-                                  "Creatine" = 0.578),
+                                  "Creatinine" = 0.578),
                                 c("Intercept" = -2.282,
                                   "Age" = NA,
                                   "SexM" = 0.223,
                                   "Smoking_Status" = 0.528,
                                   "Diabetes" = 0.200,
-                                  "Creatine" = 0.434),
+                                  "Creatinine" = 0.434),
                                 c("Intercept" = -3.013,
                                   "Age" = NA,
                                   "SexM" = NA,
                                   "Smoking_Status" = 0.565,
                                   "Diabetes" = -0.122,
-                                  "Creatine" = 0.731)))
+                                  "Creatinine" = 0.731)))
 multiple_mods <- pred_input_info(model_type = "logistic",
                                  model_info = coefs_table)
 summary(multiple_mods)

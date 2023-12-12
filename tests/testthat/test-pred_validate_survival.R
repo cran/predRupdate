@@ -12,8 +12,10 @@ test_that("output of pred_validate is as expected - single models", {
   expect_type(val_results, type = "list")
   expect_equal(names(val_results),
                c("OE_ratio", "OE_ratio_SE", "CalSlope", "CalSlope_SE", "harrell_C",
-                 "harrell_C_SE", "M"))
+                 "harrell_C_SE", "PR_dist", "flex_calibrationplot", "M"))
 
+  expect_no_error(print(val_results))
+  expect_no_error(plot(val_results))
   expect_snapshot(summary(val_results))
 })
 
@@ -31,6 +33,10 @@ test_that("output of pred_validate is as expected - multiple models", {
                               time_horizon = 5,
                               cal_plot = FALSE)
 
+  expect_no_error(print(val_results))
+  expect_no_error(summary(val_results))
+  expect_no_error(plot(val_results))
+
   expect_type(val_results, type = "list")
   expect_equal(length(val_results), model2$M + 1)
 
@@ -40,6 +46,6 @@ test_that("output of pred_validate is as expected - multiple models", {
     expect_type(val_results[[m]], type = "list")
     expect_equal(names(val_results[[m]]),
                  c("OE_ratio", "OE_ratio_SE", "CalSlope", "CalSlope_SE", "harrell_C",
-                   "harrell_C_SE"))
+                   "harrell_C_SE", "PR_dist", "flex_calibrationplot"))
   }
 })

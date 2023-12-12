@@ -8,7 +8,10 @@
 [![R-CMD-check](https://github.com/GlenMartin31/predRupdate/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/GlenMartin31/predRupdate/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/GlenMartin31/predRupdate/branch/master/graph/badge.svg)](https://app.codecov.io/gh/GlenMartin31/predRupdate?branch=master)
-<!-- [![CRAN status](https://www.r-pkg.org/badges/version/predRupdate)](https://CRAN.R-project.org/package=predRupdate) -->
+[![CRAN
+status](https://www.r-pkg.org/badges/version/predRupdate)](https://CRAN.R-project.org/package=predRupdate)
+[![metacran
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/predRupdate)](https://cran.r-project.org/package=predRupdate)
 <!-- badges: end -->
 
 The goal of predRupdate is to provide a suite of functions for
@@ -21,7 +24,7 @@ to an available dataset.
 The package can be installed from CRAN as follows:
 
 ``` r
-# install.packages("predRupdate")
+install.packages("predRupdate")
 ```
 
 ## Development version
@@ -46,7 +49,7 @@ coefs_table <- data.frame("Intercept" = -3.4,
                           "SexM" = 0.306,
                           "Smoking_Status" = 0.628,
                           "Diabetes" = 0.499,
-                          "Creatine" = 0.538)
+                          "Creatinine" = 0.538)
 
 #pass this into pred_input_info()
 Existing_Logistic_Model <- pred_input_info(model_type = "logistic",
