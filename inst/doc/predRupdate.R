@@ -32,11 +32,20 @@ validation_results <- pred_validate(x = Existing_Logistic_Model,
                                     binary_outcome = "Y")
 summary(validation_results) #use summary() to obtain a tidy output summary of the model performance
 
-## ----fig.height=6, fig.width=6------------------------------------------------
-validation_results$flex_calibrationplot
+## ----fig.height=6, fig.width=10-----------------------------------------------
+plot(validation_results)
 
 ## ----fig.height=6, fig.width=6------------------------------------------------
-validation_results$flex_calibrationplot + ggplot2::theme_classic()
+validation_results$flex_calibrationplot + 
+  ggplot2::theme_classic() +
+  ggplot2::xlim(c(0,0.5)) + ggplot2:::ylim(c(0,0.5))
+
+## -----------------------------------------------------------------------------
+validation_results <- pred_validate(x = Existing_Logistic_Model,
+                                    new_data = SYNPM$ValidationData,
+                                    binary_outcome = "Y",
+                                    level = 0.90)
+summary(validation_results) #use summary() to obtain a tidy output summary of the model performance
 
 ## ----echo = FALSE-------------------------------------------------------------
 coefs_table <- as.data.frame(round(t(SYNPM$Existing_TTE_models[1,which(!is.na(SYNPM$Existing_TTE_models[1,]))]), 3))
@@ -70,6 +79,54 @@ summary(validation_results)
 
 ## ----fig.height=6, fig.width=10-----------------------------------------------
 plot(validation_results)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  df <- SYNPM$ValidationData
+#  
+#  cox_mod <- survival::coxph(survival::Surv(ETime, Status) ~ Age + Creatinine,
+#                             data = df)
+#  coefs_table <- data.frame("Age" = coef(cox_mod)["Age"],
+#                            "Creatinine" = coef(cox_mod)["Creatinine"])
+#  
+#  #example of using basehaz() for uncentered/values:
+#  base_haz_zero <- survival::basehaz(cox_mod,
+#                                     newdata = data.frame("Age" = 0,
+#                                                          "Creatinine" = 0))
+#  #or use centered=FALSE in survival::basehaz()
+#  #base_haz_zero <- survival::basehaz(cox_mod, centered = FALSE)
+#  
+#  Existing_TTE_Model <- pred_input_info(model_type = "survival",
+#                                        model_info = coefs_table,
+#                                        cum_hazard = data.frame("time" = base_haz_zero$time,
+#                                                                "hazard" = base_haz_zero$hazard))
+#  
+#  pred_validate(x = Existing_TTE_Model,
+#                new_data = data.frame("Age" = df$Age,
+#                                      "Creatinine" = df$Creatinine,
+#                                      "ETime" = df$ETime,
+#                                      "Status" = df$Status),
+#                survival_time = "ETime",
+#                event_indicator = "Status",
+#                time_horizon = 5)
+#  
+#  
+#  #Alternatively, the below code shows how to handle the scaled/centred baseline
+#  # hazard, such that we need to also scale/centre the new_data:
+#  base_haz_centred <- survival::basehaz(cox_mod)
+#  Existing_TTE_Model <- pred_input_info(model_type = "survival",
+#                                        model_info = coefs_table,
+#                                        cum_hazard = data.frame("time" = base_haz_centred$time,
+#                                                                "hazard" = base_haz_centred$hazard))
+#  
+#  pred_validate(x = Existing_TTE_Model,
+#                new_data = data.frame("Age" = df$Age - mean(df$Age),
+#                                      "Creatinine" = df$Creatinine - mean(df$Creatinine),
+#                                      "ETime" = df$ETime,
+#                                      "Status" = df$Status),
+#                survival_time = "ETime",
+#                event_indicator = "Status",
+#                time_horizon = 5)
+#  #failing to mean-center new_data passed into pred_validate() would give erroneous results.
 
 ## -----------------------------------------------------------------------------
 # create a data.frame of the model coefficients, with columns being variables
